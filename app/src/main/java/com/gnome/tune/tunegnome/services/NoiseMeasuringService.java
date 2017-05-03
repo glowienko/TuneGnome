@@ -1,16 +1,17 @@
 package com.gnome.tune.tunegnome.services;
 
+import android.annotation.SuppressLint;
 import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
 import android.media.MediaRecorder;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import java.io.IOException;
+import com.gnome.tune.tunegnome.actions.TuneGnomeActions;
+import com.gnome.tune.tunegnome.utils.NoiseLevelNotification;
 
-/**
- * Created by Patryk Głowienko on 2017-05-03.
- */
+import java.io.IOException;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -18,10 +19,7 @@ import java.io.IOException;
  */
 public class NoiseMeasuringService extends IntentService {
 
-
-    private static final String ACTION_MEASURE_NOISE = "com.gnome.tune.tunegnome.action.MEASURE_NOISE";
     private static final double AMPLITUDE_REFERENCE = 0.1;
-    private double currentNoiseAvg = 0;
 
     MediaRecorder mediaRecorder;
 
@@ -38,7 +36,7 @@ public class NoiseMeasuringService extends IntentService {
      */
     public static void startActionMeasureNoise(Context context) {
         Intent intent = new Intent(context, NoiseMeasuringService.class);
-        intent.setAction(ACTION_MEASURE_NOISE);
+        intent.setAction(TuneGnomeActions.ACTION_START_MEASURE_NOISE);
         context.startService(intent);
     }
 
@@ -46,7 +44,7 @@ public class NoiseMeasuringService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
             final String action = intent.getAction();
-            if (ACTION_MEASURE_NOISE.equals(action)) {
+            if (TuneGnomeActions.ACTION_START_MEASURE_NOISE.equals(action)) {
                 handleActionMeasureNoise();
             }
         }
@@ -57,9 +55,26 @@ public class NoiseMeasuringService extends IntentService {
      * parameters.
      */
     private void handleActionMeasureNoise() {
-        // TODO: Handle action MeasureNoise
-        throw new UnsupportedOperationException("Not yet implemented");
+        double currentNoiseLevel = getAveragedNoiseValue();
+        broadcastNoiseValue(currentNoiseLevel);
+        NoiseLevelNotification.createOrUpdate(getApplicationContext(), Double.toString(currentNoiseLevel));
     }
+
+
+
+    //=======================
+
+    private void broadcastNoiseValue(double noiseValue) {
+        Intent intent = new Intent();
+        intent.setAction(TuneGnomeActions.ACTION_BROADCAST_NOISE_VALUE);
+        intent.putExtra("data", noiseValue);
+
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+        Log.d("BROADCAST_NOISE_VALUE", "Current noise level broadcasted successfully");
+    }
+
+
+
 
 
     //============================================
@@ -69,10 +84,11 @@ public class NoiseMeasuringService extends IntentService {
     }
 
     //gets current noise level in decibels from last 1s, sampling - each 200 ms
-    public double getCurrentNoiseLevelAvg() {
-        currentNoiseAvg = 0.0;
+    public double getAveragedNoiseValue() {
+        double currentAveragedNoise = 0.0;
 
         for(int i=0; i<5; i++) {
+            currentAveragedNoise += currentAveragedNoise + getNoiseLevelDecibels();
 
             try {
                 Thread.sleep(200);
@@ -80,10 +96,9 @@ public class NoiseMeasuringService extends IntentService {
                 e.printStackTrace();
                 return 0;
             }
-            currentNoiseAvg += currentNoiseAvg + getNoiseLevelDecibels();
         }
-        Log.d("NOISE LEVEL", "noise="+ currentNoiseAvg/5);
-        return currentNoiseAvg/5;
+        Log.d("NOISE LEVEL", "noise= "+ currentAveragedNoise/5);
+        return currentAveragedNoise/5;
     }
 
 
@@ -100,12 +115,14 @@ public class NoiseMeasuringService extends IntentService {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        Log.d("MEDIA_RECORDER_SETUP", "MediaRecorder setup success");
     }
 
     public void stopMeasurement() {
         if(mediaRecorder != null) {
             mediaRecorder.stop();
             resetSoundRecorder();
+            Log.d("STOP_MEASUREMENT", "Sound measurement stop success");
         }
     }
 

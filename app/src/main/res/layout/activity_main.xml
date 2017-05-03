@@ -7,15 +7,6 @@
     tools:context="com.gnome.tune.tunegnome.activities.MainActivity">
 
     <TextView
-        android:id="@+id/textView"
-        android:layout_width="33dp"
-        android:layout_height="30dp"
-        android:text="db"
-        android:textSize="24sp"
-        tools:layout_editor_absoluteX="213dp"
-        tools:layout_editor_absoluteY="184dp" />
-
-    <TextView
         android:id="@+id/textView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -33,37 +24,37 @@
         tools:layout_editor_absoluteY="-147dp" />
 
     <TextView
-        android:id="@+id/noiseValueTextView"
-        android:layout_width="82dp"
-        android:layout_height="32dp"
-        android:textSize="30sp"
-        tools:layout_editor_absoluteX="105dp"
-        tools:layout_editor_absoluteY="184dp" />
-
-    <TextView
         android:id="@+id/textView4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Current sound level:"
         android:textSize="24sp"
-        tools:layout_editor_absoluteX="78dp"
-        tools:layout_editor_absoluteY="266dp" />
+        tools:layout_editor_absoluteX="87dp"
+        tools:layout_editor_absoluteY="214dp" />
 
     <TextView
         android:id="@+id/currentSoundLvlTextView"
-        android:layout_width="8dp"
+        android:layout_width="9dp"
         android:layout_height="29dp"
         android:textSize="24sp"
-        tools:layout_editor_absoluteX="313dp"
-        tools:layout_editor_absoluteY="266dp" />
+        tools:layout_editor_absoluteX="322dp"
+        tools:layout_editor_absoluteY="214dp" />
 
     <Button
         android:id="@+id/button3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="startMeasureNoiseLevel"
+        android:onClick="startMeasureNoise"
         android:text="Start measuring noise level"
         tools:layout_editor_absoluteX="73dp"
         tools:layout_editor_absoluteY="88dp" />
+
+    <Button
+        android:id="@+id/stopMeasureButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Stop measurement"
+        tools:layout_editor_absoluteX="109dp"
+        tools:layout_editor_absoluteY="293dp" />
 
 </android.support.constraint.ConstraintLayout>
