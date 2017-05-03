@@ -55,6 +55,7 @@ public class NoiseMeasuringService extends IntentService {
      * parameters.
      */
     private void handleActionMeasureNoise() {
+        setupMediaRecorder();
         double currentNoiseLevel = getAveragedNoiseValue();
         broadcastNoiseValue(currentNoiseLevel);
         NoiseLevelNotification.createOrUpdate(getApplicationContext(), Double.toString(currentNoiseLevel));
