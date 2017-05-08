@@ -1,9 +1,8 @@
 package com.gnome.tune.tunegnome.services;
 
-import android.annotation.SuppressLint;
 import android.app.IntentService;
-import android.content.Intent;
 import android.content.Context;
+import android.content.Intent;
 import android.media.MediaRecorder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -20,8 +19,11 @@ import java.io.IOException;
 public class NoiseMeasuringService extends IntentService {
 
     private static final double AMPLITUDE_REFERENCE = 0.1;
-
-    MediaRecorder mediaRecorder;
+    private static final String RECORDER_OUTPUT_FILE = "/dev/null";
+    private static final String DATA_INTENT_FIELD_NAME = "data";
+    private static final String LOG_TAG = "NOISE_MEASURE_SERVICE";
+    private boolean continueMeasurement = false;
+    public MediaRecorder recorder;
 
 
     public NoiseMeasuringService() {
@@ -45,6 +47,7 @@ public class NoiseMeasuringService extends IntentService {
         if (intent != null) {
             final String action = intent.getAction();
             if (TuneGnomeActions.ACTION_START_MEASURE_NOISE.equals(action)) {
+                continueMeasurement = true;
                 handleActionMeasureNoise();
             }
         }
@@ -56,9 +59,15 @@ public class NoiseMeasuringService extends IntentService {
      */
     private void handleActionMeasureNoise() {
         setupMediaRecorder();
-        double currentNoiseLevel = getAveragedNoiseValue();
-        broadcastNoiseValue(currentNoiseLevel);
-        NoiseLevelNotification.createOrUpdate(getApplicationContext(), Double.toString(currentNoiseLevel));
+
+      //  while(continueMeasurement) {
+            double currentNoiseLevel = getAveragedNoiseValue();
+            broadcastNoiseValue(currentNoiseLevel);
+            NoiseLevelNotification.createOrUpdate(getApplicationContext(), Double.toString(currentNoiseLevel));
+          // checkMeasurementStatusChange();
+
+        stopMeasurement();
+      //  }
     }
 
 
@@ -68,10 +77,10 @@ public class NoiseMeasuringService extends IntentService {
     private void broadcastNoiseValue(double noiseValue) {
         Intent intent = new Intent();
         intent.setAction(TuneGnomeActions.ACTION_BROADCAST_NOISE_VALUE);
-        intent.putExtra("data", noiseValue);
+        intent.putExtra(DATA_INTENT_FIELD_NAME, noiseValue);
 
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
-        Log.d("BROADCAST_NOISE_VALUE", "Current noise level broadcasted successfully");
+        Log.d(LOG_TAG, "Current noise level broadcasted successfully");
     }
 
 
@@ -81,7 +90,9 @@ public class NoiseMeasuringService extends IntentService {
     //============================================
 
     private double getNoiseLevelDecibels() {
-        return (20 * Math.log10(mediaRecorder.getMaxAmplitude() / AMPLITUDE_REFERENCE));
+        double maxAmplitude = recorder.getMaxAmplitude();
+        if(maxAmplitude != 0) return (20 * Math.log10(maxAmplitude / AMPLITUDE_REFERENCE));
+        else return 0.00;
     }
 
     //gets current noise level in decibels from last 1s, sampling - each 200 ms
@@ -98,57 +109,35 @@ public class NoiseMeasuringService extends IntentService {
                 return 0;
             }
         }
-        Log.d("NOISE LEVEL", "noise= "+ currentAveragedNoise/5);
+        Log.d(LOG_TAG, "current noise= "+ currentAveragedNoise/5);
         return currentAveragedNoise/5;
     }
 
 
 
     public void setupMediaRecorder() {
-        mediaRecorder = new MediaRecorder();
-        mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-        mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-        mediaRecorder.setOutputFile("/dev/null");
+        recorder = new MediaRecorder();
+        recorder.setAudioSource(MediaRecorder.AudioSource.MIC);//MediaRecorder.AudioSource.MIC
+        recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);//MediaRecorder.OutputFormat.THREE_GPP
+        recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);//MediaRecorder.AudioEncoder.AMR_NB
+        recorder.setOutputFile(RECORDER_OUTPUT_FILE);
 
         try {
-            mediaRecorder.prepare();
+            recorder.prepare();//titaj jest udefined nie wiem dlaczego :(   i przez to się wywala, no i nie da się pomairu odpalić
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Log.d("MEDIA_RECORDER_SETUP", "MediaRecorder setup success");
+        recorder.start();
+        Log.d(LOG_TAG, "MediaRecorder setup success");
     }
 
     public void stopMeasurement() {
-        if(mediaRecorder != null) {
-            mediaRecorder.stop();
-            resetSoundRecorder();
-            Log.d("STOP_MEASUREMENT", "Sound measurement stop success");
+        if(recorder != null) {
+            recorder.stop();
+            recorder.release();
+            recorder = null;
+            Log.d(LOG_TAG, "Sound measurement stop success");
         }
     }
-
-    public void resetSoundRecorder() {
-        mediaRecorder.release();
-        mediaRecorder = null;
-    }
-
-
-
-
-//        /**
-//     * Starts this service to perform action MeasureNoise with the given parameters. If
-//     * the service is already performing a task this action will be queued.
-//     *
-//     * @see IntentService
-//     */
-//    // TODO: Customize helper method
-//    public static void startActionMeasureNoise(Context context, String param1, String param2) {
-//        Intent intent = new Intent(context, NoiseMeasuringService.class);
-//        intent.setAction(ACTION_FOO);
-//        intent.putExtra(EXTRA_PARAM1, param1);
-//        intent.putExtra(EXTRA_PARAM2, param2);
-//        context.startService(intent);
-//    }
-
 
 }

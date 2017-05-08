@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <TextView
+        android:id="@+id/textView"
+        tools:layout_editor_absoluteX="25dp"
+        tools:layout_editor_absoluteY="41dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/click_here_to_start_measuring_sound_in_decibels"
+        android:textSize="16sp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="98dp" />
+
+    <TextView
+        android:id="@+id/textView3"
+        tools:layout_editor_absoluteX="87dp"
+        tools:layout_editor_absoluteY="214dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/current_sound_level"
+        android:textSize="24sp"
+        android:layout_marginBottom="56dp"
+        android:layout_above="@+id/button4"
+        android:layout_alignStart="@+id/button4" />
+
+    <Button
+        android:id="@+id/button2"
+        tools:layout_editor_absoluteX="73dp"
+        tools:layout_editor_absoluteY="88dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="startMeasureNoise"
+        android:text="@string/start_measuring_noise_level"
+        android:layout_marginTop="48dp"
+        android:layout_below="@+id/textView"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        android:id="@+id/button4"
+        tools:layout_editor_absoluteX="109dp"
+        tools:layout_editor_absoluteY="293dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="stopMeasureNoise"
+        android:text="@string/stop_measurement"
+        android:layout_marginBottom="90dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:id="@+id/currentSoundLevel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/textView3"
+        android:layout_alignEnd="@+id/textView" />
+</RelativeLayout>

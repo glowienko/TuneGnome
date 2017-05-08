@@ -15,4 +15,8 @@
 
     <string name="action_share">Share</string>
     <string name="action_reply">Reply</string>
+    <string name="stop_measurement">Stop measurement</string>
+    <string name="start_measuring_noise_level">Start measuring noise level</string>
+    <string name="current_sound_level">Current sound level:</string>
+    <string name="click_here_to_start_measuring_sound_in_decibels">Click here to start measuring sound in decibels</string>
 </resources>
