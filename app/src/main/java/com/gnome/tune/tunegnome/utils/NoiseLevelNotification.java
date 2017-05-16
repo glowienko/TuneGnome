@@ -6,12 +6,10 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 
 import com.gnome.tune.tunegnome.R;
-import com.gnome.tune.tunegnome.actions.TuneGnomeActions;
 import com.gnome.tune.tunegnome.activities.MainActivity;
 
 /**
@@ -26,22 +24,7 @@ public class NoiseLevelNotification {
 
     private static final String NOTIFICATION_TITLE = "Noise level";
 
-    /**
-     * Shows the notification, or updates a previously shown notification of
-     * this type, with the given parameters.
-     * <p>
-     * TODO: Customize this method's arguments to present relevant content in
-     * the notification.
-     * <p>
-     * presentation of noise level notifications. Make
-     * sure to follow the
-     * <a href="https://developer.android.com/design/patterns/notifications.html">
-     * Notification design guidelines</a> when doing so.
-     *
-     * @see #cancel(Context)
-     */
 
-    //chyba update tez zadziała, bo wygenerowane jednak, w teorii, jako, że jest ten sam NOTIFICATION_TAG, powinno zrobic update, a nie tworzyc nową notyfikacje :)
     public static void createOrUpdate(final Context context, final String text) {
 
         final NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
