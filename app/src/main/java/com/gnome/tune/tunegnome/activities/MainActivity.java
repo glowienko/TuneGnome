@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 import android.widget.TextView;
 
 import com.gnome.tune.tunegnome.R;
@@ -42,13 +43,13 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void startMeasureNoise() {
-        Intent serviceIntent = new Intent(this, NoiseMeasuringService.class);
+    public void startMeasureNoise(View view) {
+        Intent serviceIntent = new Intent(getApplicationContext(), NoiseMeasuringService.class);
         serviceIntent.setAction(TuneGnomeActions.ACTION_START_MEASURE_NOISE);
         getApplicationContext().startService(serviceIntent);
     }
 
-    public void stopMeasureNoise() {
+    public void stopMeasureNoise(View view) {
         Intent serviceIntent = new Intent(this, NoiseMeasuringService.class);
        getApplicationContext(). stopService(serviceIntent);
     }
