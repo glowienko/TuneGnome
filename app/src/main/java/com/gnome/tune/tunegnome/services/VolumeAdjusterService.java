@@ -1,24 +1,24 @@
 package com.gnome.tune.tunegnome.services;
 
 import android.app.IntentService;
+import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 
-import com.gnome.tune.tunegnome.utils.CustomVolumeProvider;
-
+import static android.media.AudioManager.*;
 import static com.gnome.tune.tunegnome.actions.TuneGnomeActions.ACTION_NOISE_VALUE;
 import static com.gnome.tune.tunegnome.actions.TuneGnomeActions.NOISE_PARAM;
 
 public class VolumeAdjusterService extends IntentService {
 
-
-    CustomVolumeProvider volumeProvider;
+    private AudioManager audioManager;
 
 
     public VolumeAdjusterService() {
         super("VolumeAdjusterService");
-
+        audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -28,7 +28,6 @@ public class VolumeAdjusterService extends IntentService {
         if (intent != null) {
             final String action = intent.getAction();
             if (ACTION_NOISE_VALUE.equals(action)) {
-                volumeProvider = new CustomVolumeProvider(1, 10, 1);
                 handleActionNoiseValue(intent.getStringExtra(NOISE_PARAM));
             }
         }
@@ -41,6 +40,15 @@ public class VolumeAdjusterService extends IntentService {
 
         //TODO: DECYZJA CO DO ZMIANY GŁOŚNOŚCI NA PODSTAWIE POMIARÓW
 
+    }
+
+    private void callSoundDown() {
+        audioManager.setStreamVolume(STREAM_RING, audioManager.getStreamVolume(STREAM_RING) - 1 , 0);
+
+    }
+
+    private void callSoundUp() {
+        audioManager.setStreamVolume(STREAM_RING, audioManager.getStreamVolume(STREAM_RING) + 1 , 0);
     }
 
 }

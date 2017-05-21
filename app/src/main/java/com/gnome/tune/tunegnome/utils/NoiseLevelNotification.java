@@ -3,14 +3,11 @@ package com.gnome.tune.tunegnome.utils;
 import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 
 import com.gnome.tune.tunegnome.R;
-import com.gnome.tune.tunegnome.activities.MainActivity;
 
 /**
  * Helper class for showing and canceling noise level
@@ -28,17 +25,9 @@ public class NoiseLevelNotification {
     public static void createOrUpdate(final Context context, final String text) {
 
         final NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
-                .setDefaults(Notification.DEFAULT_ALL)
                 .setSmallIcon(R.drawable.hearing_icon)
                 .setContentTitle(NOTIFICATION_TITLE)
                 .setContentText(text)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setContentIntent(
-                        PendingIntent.getActivity(
-                                context,
-                                0,
-                                new Intent(context, MainActivity.class),
-                                PendingIntent.FLAG_UPDATE_CURRENT))
                 .setAutoCancel(false);
 
         notify(context, builder.build());

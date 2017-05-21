@@ -3,7 +3,9 @@ package com.gnome.tune.tunegnome.services;
 import android.app.IntentService;
 import android.content.Intent;
 import android.media.AudioFormat;
+import android.media.AudioManager;
 import android.media.AudioRecord;
+import android.media.AudioTrack;
 import android.media.MediaRecorder;
 import android.util.Log;
 
@@ -44,7 +46,10 @@ public class NoiseMeasuringService extends IntentService {
 
     private void handleActionMeasureNoise() {
         setupAudioRecorder();
-        startMeasurement();
+
+        if (audioRecorder != null && audioRecorder.getState() == AudioRecord.STATE_INITIALIZED) {
+            startMeasurement();
+        }
     }
 
     private void startMeasurement() {
@@ -108,37 +113,16 @@ public class NoiseMeasuringService extends IntentService {
     }
 
     private void setupAudioRecorder() {
-        findAudioRecord();
-        if(audioRecorder == null) {
-            stopSelf();
-        }
-    }
+        int rate = AudioTrack.getNativeOutputSampleRate(AudioManager.STREAM_SYSTEM);
+        int bufferSize = AudioRecord.getMinBufferSize(rate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
+        buffer = new short[bufferSize*2];
 
-
-    public AudioRecord findAudioRecord() {
-        int[] sampleRates = new int[]{8000, 11025, 22050, 44100};
-        for (int rate : sampleRates) {
-            for (short audioFormat : new short[]{AudioFormat.ENCODING_PCM_8BIT, AudioFormat.ENCODING_PCM_16BIT}) {
-                for (short channelConfig : new short[]{AudioFormat.CHANNEL_IN_MONO, AudioFormat.CHANNEL_IN_STEREO}) {
-                    try {
-                        Log.d("findingAudioRecord", "Attempting rate " + rate + "Hz, bits: " + audioFormat + ", channel: "
-                                + channelConfig);
-                        int bufferSize = AudioRecord.getMinBufferSize(rate, channelConfig, audioFormat);
-
-                        if (bufferSize != AudioRecord.ERROR_BAD_VALUE) {
-                            // check if we can instantiate and have a success
-                            AudioRecord recorder = new AudioRecord(MediaRecorder.AudioSource.DEFAULT, rate, channelConfig, audioFormat, bufferSize);
-
-                            if (recorder.getState() == AudioRecord.STATE_INITIALIZED)
-                                return recorder;
-                        }
-                    } catch (Exception e) {
-                        Log.e("findingAudioRecord", rate + "Exception, keep trying.", e);
-                    }
-                }
-            }
-        }
-        return null;
+        audioRecorder = new AudioRecord(
+                MediaRecorder.AudioSource.MIC,
+                rate,
+                AudioFormat.CHANNEL_IN_MONO,
+                AudioFormat.ENCODING_PCM_16BIT,
+                bufferSize);
     }
 
 }
