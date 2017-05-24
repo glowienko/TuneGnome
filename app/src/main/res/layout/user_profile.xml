@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="50dp"
+        android:layout_marginTop="16dp"
+        android:text="Your sound profiles:"
+        android:textSize="18sp" />
+
+    <Button
+        android:id="@+id/addProfileButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/textView"
+        android:layout_below="@+id/textView"
+        android:layout_marginTop="22dp"
+        android:onClick="addNewProfile"
+        android:text="Add "
+        android:textSize="12sp" />
+
+    <ListView
+        android:id="@+id/profilesList"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="134dp"
+        android:layout_below="@+id/addProfileButton"
+        android:layout_alignParentStart="true" />
+
+    <Button
+        android:id="@+id/backToMain"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/profilesList"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="34dp"
+        android:onClick="backToMain"
+        android:text="back" />
+
+    <TextView
+        android:id="@+id/clickToDeleteInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/addProfileButton"
+        android:layout_below="@+id/addProfileButton"
+        android:layout_marginTop="41dp"
+        android:text="Click on profile to delete:"
+        android:textSize="16sp"
+        tools:text="Click on profile to delete:" />
+
+</RelativeLayout>

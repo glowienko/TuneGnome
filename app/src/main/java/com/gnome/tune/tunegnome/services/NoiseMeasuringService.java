@@ -2,16 +2,13 @@ package com.gnome.tune.tunegnome.services;
 
 import android.app.IntentService;
 import android.content.Intent;
-import android.media.AudioFormat;
-import android.media.AudioManager;
-import android.media.AudioRecord;
-import android.media.AudioTrack;
 import android.media.MediaRecorder;
 import android.util.Log;
 
 import com.gnome.tune.tunegnome.actions.TuneGnomeActions;
 import com.gnome.tune.tunegnome.utils.NoiseLevelNotification;
 
+import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -24,7 +21,7 @@ import static com.gnome.tune.tunegnome.actions.TuneGnomeActions.NOISE_PARAM;
 public class NoiseMeasuringService extends IntentService {
 
     private static final String LOG_TAG = "NOISE_SERVICE: ";
-    private AudioRecord audioRecorder;
+    private MediaRecorder recorder;
     private short[] buffer;
     private Timer timer;
 
@@ -45,15 +42,18 @@ public class NoiseMeasuringService extends IntentService {
     }
 
     private void handleActionMeasureNoise() {
-        setupAudioRecorder();
-
-        if (audioRecorder != null && audioRecorder.getState() == AudioRecord.STATE_INITIALIZED) {
-            startMeasurement();
-        }
+        setupMediaRecorder();
+        startMeasurement();
     }
 
     private void startMeasurement() {
-        audioRecorder.startRecording();
+
+        try {
+            recorder.prepare();
+            recorder.start();
+        } catch(IllegalStateException | IOException e) {
+            e.printStackTrace();
+        }
 
         timer = new Timer(LOG_TAG, true);
         timer.scheduleAtFixedRate(createTimerTaskForMeasurement(), 0, 500);
@@ -62,22 +62,17 @@ public class NoiseMeasuringService extends IntentService {
     private TimerTask createTimerTaskForMeasurement() {
         return new TimerTask() {
             public void run() {
-                int readSize = audioRecorder.read(buffer, 0, buffer.length);
+
                 double currentNoiseLevel = 0;
                 double maxAmplitude = 0;
 
-                for (int i = 0; i < readSize; i++) {
-                    if (Math.abs(buffer[i]) > maxAmplitude) {
-                        maxAmplitude = Math.abs(buffer[i]);
-                    }
-                }
 
                 if (maxAmplitude != 0) {
                     currentNoiseLevel = 20.0 * Math.log10(maxAmplitude / 32767.0) + 90;
                 }
                 Log.d(LOG_TAG, Double.toString(currentNoiseLevel));
 
-                broadcastNoiseValue(currentNoiseLevel); //todo: powinno być najpierw uśrenienie z okresu 1 s np. czy coś, może :D
+                broadcastNoiseValue(currentNoiseLevel);
                 NoiseLevelNotification.createOrUpdate(getApplicationContext(), Double.toString(currentNoiseLevel));
             }
         };
@@ -98,31 +93,25 @@ public class NoiseMeasuringService extends IntentService {
         super.onDestroy();
         NoiseLevelNotification.cancel(getApplicationContext());
 
-        buffer = null;
-        if (audioRecorder != null) {
-            audioRecorder.stop();
-            audioRecorder.release();
-            audioRecorder = null;
+        if (recorder != null) {
+            recorder.stop();
+            recorder.release();
+            recorder = null;
             if (timer != null) {
                 timer.cancel();
                 timer = null;
             }
         } else {
-            throw new IllegalStateException("Cannot destroy, audioRecorder is not initialized");
+            throw new IllegalStateException("Cannot destroy, recorder is not initialized");
         }
     }
 
-    private void setupAudioRecorder() {
-        int rate = AudioTrack.getNativeOutputSampleRate(AudioManager.STREAM_SYSTEM);
-        int bufferSize = AudioRecord.getMinBufferSize(rate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
-        buffer = new short[bufferSize*2];
-
-        audioRecorder = new AudioRecord(
-                MediaRecorder.AudioSource.MIC,
-                rate,
-                AudioFormat.CHANNEL_IN_MONO,
-                AudioFormat.ENCODING_PCM_16BIT,
-                bufferSize);
+    private void setupMediaRecorder() {
+        MediaRecorder recorder = new MediaRecorder();
+        recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+        recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+        recorder.setOutputFile("/dev/null");
     }
 
 }
