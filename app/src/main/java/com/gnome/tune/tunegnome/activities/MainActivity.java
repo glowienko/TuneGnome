@@ -16,6 +16,11 @@ import com.gnome.tune.tunegnome.actions.TuneGnomeActions;
 import com.gnome.tune.tunegnome.services.NoiseMeasuringService;
 import com.gnome.tune.tunegnome.storage.ProfilesDatabaseHelper;
 import com.gnome.tune.tunegnome.utils.NoiseLevelNotification;
+import com.gnome.tune.tunegnome.utils.UserProfile;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -43,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void startMeasureNoise(View view) {
-//        checkIfProfileActive();
+        checkIfProfileActive();
 
         if (permissionToRecordAccepted && !isProfileActive) {
             startMeasureService();
@@ -88,17 +93,25 @@ public class MainActivity extends AppCompatActivity {
 
     //Metoda, która ma za zadanie sprawdzenie, czy aktualny czas jest uwzględniony w profilowaniu
     public void checkIfProfileActive() {
-//        Calendar cal = Calendar.getInstance();
-//        cal.setTime(new Date());
-//        Double hours = (double) cal.get(Calendar.HOUR_OF_DAY);
-//
-//
-//
-//        //  float currTime = (float)new Date().getTime();
-//        if ((isBetween((hours), beginSleepTime, endSleepTime)))
-//            audioManager.setRingerMode(AudioManager.RINGER_MODE_SILENT);
-//        else
-//            audioManager.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(new Date());
+        Double hours = (double) cal.get(Calendar.HOUR_OF_DAY);
+        ArrayList<UserProfile> profiles = dbHelper.getAllProfiles();
+
+        if(!profiles.isEmpty()) {
+            isProfileActive = true;
+            for (int i = 0; i < profiles.size(); i++) {
+
+                Integer startHour = profiles.get(i).getStartTimeHours();
+                Integer endHour = profiles.get(i).getEndTimeHours();
+                if ((isBetween((hours), startHour, endHour))) {
+                    audioManager.setRingerMode(AudioManager.RINGER_MODE_SILENT);
+                }
+                else {
+                    audioManager.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
+                }
+            }
+        }
     }
 
     public static boolean isBetween(Double x, int floorValue, int cellValue) {
